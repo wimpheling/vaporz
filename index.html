@@ -1,0 +1,129 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+  <title>Title</title>
+
+  <link rel="stylesheet" href="style.css"/>
+  <style>
+  .demo-container {
+    position: relative;
+  }
+  .rect {
+      border: 2px solid #a64ceb;
+      left: -1000px;
+      position: absolute;
+      top: -1000px;
+    }
+
+    #img {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      margin: -173px 0 0 -300px;
+    }
+    .imgs img {
+      float: left;
+      max-height: 60px;
+    }
+    </style>
+    <!-- <script src="bower_components/tracking/build/tracking-min.js"></script>
+    <script src="bower_components/tracking/build/data/face-min.js"></script> -->
+    <script src="bower_components/jquery/dist/jquery.min.js"></script>
+    <script src="bower_components/jquery.facedetection/dist/jquery.facedetection.min.js"></script>
+  <script src="script.js"></script>
+  <script></script>
+</head>
+
+<body>
+    <div class="imgs">
+      <img src="img/vaporface.png" id="vapor" />
+    </div>
+    <br style="clear:both;" />
+    <input type='file' id='imgfile' onchange="loadImage();" /><br>
+    <div class="demo-container">
+        <canvas width="500" height="500" id="anti"></canvas>
+        <!-- <img src="faces.jpg" id="anti" onload="detectFaces()" /> -->
+    </div>
+    <script>
+    function loadImage() {
+        var input, file, fr, img;
+
+        if (typeof window.FileReader !== 'function') {
+            write("The file API isn't supported on this browser yet.");
+            return;
+        }
+
+        input = document.getElementById('imgfile');
+        if (!input) {
+            write("Um, couldn't find the imgfile element.");
+        }
+        else if (!input.files) {
+            write("This browser doesn't seem to support the `files` property of file inputs.");
+        }
+        else if (!input.files[0]) {
+            write("Please select a file before clicking 'Load'");
+        }
+        else {
+            file = input.files[0];
+            fr = new FileReader();
+            fr.onload = createImage;
+            fr.readAsDataURL(file);
+        }
+
+        function createImage() {
+            img = new Image();
+            img.onload = imageLoaded;
+            img.src = fr.result;
+        }
+
+        function imageLoaded() {
+            var canvas = document.getElementById("anti")
+            canvas.width = img.width;
+            canvas.height = img.height;
+
+            var ctx = canvas.getContext("2d");
+            ctx.drawImage(img,0,0);
+            detectFaces()
+            //alert(canvas.toDataURL("image/png"));
+        }
+
+        function write(msg) {
+            var p = document.createElement('p');
+            p.innerHTML = msg;
+            document.body.appendChild(p);
+        }
+    }
+      var detectFaces = function() {
+        $('.rect').remove()
+        $('#anti').faceDetection({
+            complete: function (faces) {
+              console.log(faces);
+              for (var i = 0; i < faces.length; i++) {
+                  var face = faces[i]
+                  console.log(face);
+                    plot(face.x, face.y, face.width, face.height);
+              }
+            }
+        });
+      };
+
+      var plot = function(x, y, w, h) {
+        var rect = document.createElement('div');
+        document.querySelector('.demo-container').appendChild(rect);
+        rect.classList.add('rect');
+        rect.style.width = w + 'px';
+        rect.style.height = h + 'px';
+        rect.style.left = (x) + 'px';
+        rect.style.top = (y) + 'px';
+        var canvas = document.getElementById("anti")
+        var img = document.getElementById("vapor")
+        console.log('aaa');
+        var ctx = canvas.getContext("2d");
+        ctx.drawImage(img,x, y, w, h);
+      };
+    </script>
+
+</body>
+</html>
